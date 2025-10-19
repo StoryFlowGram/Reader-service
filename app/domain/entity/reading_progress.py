@@ -3,9 +3,9 @@ from datetime import datetime
 
 
 @dataclass
-class ReaddingProgress:
-    id: int
+class ReadingProgressDomain:
     user_book_id: int
     chapter_id: int
     position: float
-    updated_at: datetime
+    id: int | None = None
+    updated_at: datetime | None = None
