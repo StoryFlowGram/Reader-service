@@ -10,7 +10,7 @@ class UserBookProtocol(ABC):
         ...
 
     @abstractmethod
-    async def get(self, user_id: int, book_id: int) -> list:
+    async def get(self, user_id: int, book_id: int):
         ...
 
     @abstractmethod
