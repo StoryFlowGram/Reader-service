@@ -9,4 +9,4 @@ class ReadingProgressDTO:
     user_book_id: int
     chapter_id: int
     position: float
-    updated_at: Optional[datetime]
+    updated_at: datetime
