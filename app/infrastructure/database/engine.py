@@ -9,9 +9,3 @@ engine: AsyncEngine = create_async_engine(
     config.db.sqlalchemy_database_url("asyncpg"),
     echo=True,
 )
-
-
-async def flush_database(engine: AsyncEngine):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
