@@ -1,14 +1,16 @@
 from app.domain.entity.user_book import UserBook
-from app.domain.protocols.user_book_protocol import UserBookProtocol
+from app.domain.exception.user_book import UserBookNotFound
+from app.application.interfaces.uow import UnitOfWorkInterface
 
 
 
-class RemoveBookFromLibrary:
-    def __init__(self, protocol: UserBookProtocol):
-        self.protocol = protocol
+class RemoveBookFromLibraryUseCase:
+    def __init__(self, uow:UnitOfWorkInterface):
+        self.uow = uow
 
     async def __call__(self, user_id: int, book_id: int) -> None:
-        check_exists = await self.protocol.get(user_id, book_id)
-        if not check_exists:
-            raise ValueError("Книги нет в библиотеке")
-        await self.protocol.delete(user_id, book_id)
+        async with self.uow:
+            check_exists = await self.uow.user_books.get(user_id, book_id)
+            if not check_exists:
+                raise UserBookNotFound("Книги нет в библиотеке")
+            await self.uow.user_books.delete(user_id, book_id)
