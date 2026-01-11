@@ -1,3 +1,4 @@
+from httpx import delete
 from sqlalchemy.orm import Mapped, mapped_column, validates, relationship
 from sqlalchemy.types import Integer, Float, DateTime
 from sqlalchemy import func, ForeignKey
@@ -11,7 +12,7 @@ class ReadingProgressModel(Base):
     __tablename__ = "reading_progress"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_book_id: Mapped[int] = mapped_column(Integer, ForeignKey("user_books.id"))
+    user_book_id: Mapped[int] = mapped_column(Integer, ForeignKey("user_books.id", ondelete="CASCADE"))
     chapter_id: Mapped[int] = mapped_column(Integer)
     position: Mapped[float] = mapped_column(Float, doc="прогресс пользователя по главе в книге")
     updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
