@@ -22,7 +22,7 @@ class UserBookProtocol(ABC):
         ...
 
     @abstractmethod
-    async def update(self, user_id: int, book_id: int,  overall_progress: Optional[float]) -> UserBook:
+    async def update(self, user_book: UserBook) -> UserBook:
         ...
     
     @abstractmethod
