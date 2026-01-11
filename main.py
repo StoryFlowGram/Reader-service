@@ -18,3 +18,4 @@ app.include_router(reading_progress_router)
 app.dependency_overrides[depends.book_protocol] = di.book_protocol
 app.dependency_overrides[depends.reading_progress_protocol] = di.reading_progress_protocol
 app.dependency_overrides[depends.uow_dependency] = di.uow_dependency
+app.dependency_overrides[depends.book_service_provider] = di.get_book_service_provider
