@@ -5,6 +5,8 @@ import os
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from app.infrastructure.database.base import Base
+from app.infrastructure.models.reading_progress import ReadingProgressModel
+from app.infrastructure.models.user_book import UserBookModel
 
 
 from alembic import context
