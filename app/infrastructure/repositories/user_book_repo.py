@@ -35,14 +35,21 @@ class UserBookRepository(UserBookProtocol):
         stmt = delete(UserBookModel).where(UserBookModel.user_id == user_id).where(UserBookModel.book_id == book_id)
         await self.session.execute(stmt)
 
-    async def update(self, user_id: int, book_id: int,  overall_progress: Optional[float]) -> UserBook:
-        stmt = update(UserBookModel).where(UserBookModel.user_id == user_id).where(UserBookModel.book_id == book_id).values(
-            overall_progress=overall_progress
-        )
-        await self.session.execute(stmt)
-        stmt_select = select(UserBookModel).where(UserBookModel.user_id == user_id).where(UserBookModel.book_id == book_id)
-        result = await self.session.execute(stmt_select)
-        orm = result.scalars().one_or_none()
+    async def update(self, user_book: UserBook) -> UserBook:
+        stmt = update(UserBookModel).where(
+            UserBookModel.user_id == user_book.user_id
+        ).where(
+            UserBookModel.book_id == user_book.book_id
+        ).values(
+            overall_progress=user_book.overall_progress
+        ).returning(UserBookModel) 
+        
+        result = await self.session.execute(stmt)
+        orm = result.scalar_one_or_none()
+        
+        if not orm:
+             return user_book 
+             
         return orm_to_domain(orm)
 
     async def get_list_by_user(self, user_id: int):

@@ -22,13 +22,22 @@ class ReadingProgressRepository(ReadingProgressProtocol):
     async def add(self, progress: ReadingProgressDomain) -> ReadingProgressDomain:
         orm_model = domain_to_orm(progress)
         self.session.add(orm_model)
+        await self.session.flush()
+        await self.session.refresh(orm_model)
+
         return orm_to_domain(orm_model)
 
     async def update(self, progress: ReadingProgressDomain) -> ReadingProgressDomain:
         stmt = update(ReadingProgressModel).where(ReadingProgressModel.id == progress.id).values(
             position=progress.position,
-            chapter_id=progress.chapter_id
+            chapter_id=progress.chapter_id,
+            updated_at=progress.updated_at 
         ).returning(ReadingProgressModel)
+        
         result = await self.session.execute(stmt)
         orm_model = result.scalar_one_or_none()
+        
+        if not orm_model:
+             raise ValueError(f"ReadingProgress with id {progress.id} not found for update")
+
         return orm_to_domain(orm_model)
