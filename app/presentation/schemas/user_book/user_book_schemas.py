@@ -3,7 +3,6 @@ from datetime import datetime
 
 
 class AddRequestSchema(BaseModel):
-    user_id: int
     book_id: int
     overall_progress: float = 0.0
 
@@ -22,4 +21,5 @@ class AddResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class UpdateRequestSchema(BaseModel):
+    book_id: int
     overall_progress: float
