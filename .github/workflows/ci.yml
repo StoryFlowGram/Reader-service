@@ -4,47 +4,76 @@ on:
   push:
     branches:
       - main
+      - test-ci/cd
   pull_request:
     branches:
       - main
+      - test-ci/cd
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Скачиваем код репозитория
+      - name: Скачуємо код репозиторію
         uses: actions/checkout@v4
 
-      - name: Устанавливаем Python 3.12
+      - name: Установлюємо Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Устанавливаем Poetry
+      - name: Установлюємо Poetry
         run: pip install poetry
 
-      - name: Устанавливаем зависимости проекта
+      - name: Установлюємо залежності проекту
   
         run: poetry install --no-interaction --no-root
 
-      - name: Подготовка к сборке Docker-образа
+      - name: Підготовка для збірки Docker-образа
         id: prep
         run: |
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           echo "image_id=$IMAGE_ID" >> $GITHUB_OUTPUT
 
-      - name: Логинимся в GitHub Container Registry
+      - name: Логінимся в GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }} 
           password: ${{ secrets.GITHUB_TOKEN }} 
 
-      - name: Собираем и пушим Docker-образ в GCR
+      - name: Збираємо та пушим Docker-образ в GCR
         uses: docker/build-push-action@v5
         with:
             context: .
             push: true
             tags: ${{ steps.prep.outputs.image_id }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ci/cd'
+
+    steps:
+      - name: Выполняем деплой на сервере
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/deployer/sfg-app
+
+            # Логінимся в GHCR
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            #Скачуємо нові образи з GHCR
+            docker compose -f docker-compose-prod.yml pull
+
+            #Перезапускаемо контейнери з новими образами
+            docker compose -f docker-compose-prod.yml up -d --remove-orphans
+
+            #Очищуємо кеш Docker-образів
+            docker image prune -f
