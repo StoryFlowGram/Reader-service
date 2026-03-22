@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from app.infrastructure.config.config import Config
 from app.infrastructure.database.base import Base
 
-config = Config(env_file=".env")
+config = Config()
 
 
 engine: AsyncEngine = create_async_engine(

@@ -11,7 +11,7 @@ config = Config()
 
 class HttpBookService(IBookServiceProtocol):
     def __init__(self):
-        self.base_url = config.url.BOOK_SERVICE_URL 
+        self.base_url = config.url.book_service_url
 
     async def get_book(self, book_id: int, target_chapter_id: int = None) -> BookServiceDTO:
         url = f"{self.base_url}/{book_id}/chapters"
