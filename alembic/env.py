@@ -13,8 +13,9 @@ settings = Config()
 
 config = context.config
 
-url = str(settings.db.sqlalchemy_database_url("psycopg2"))
-config.set_main_option(name="sqlalchemy.url", value=str(url))
+url_obj = settings.db.sqlalchemy_database_url("psycopg2")
+db_url = url_obj.render_as_string(hide_password=False)
+config.set_main_option(name="sqlalchemy.url", value=db_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
