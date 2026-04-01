@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.application.interfaces.get_book_service import IBookServiceProtocol
@@ -9,6 +11,7 @@ from app.presentation.schemas.reading_progress.reading_progress_schemas import R
 from app.presentation.api.depends import get_id_from_header, book_service_provider, uow_dependency 
 
 reading_progress_router = APIRouter(tags=["reading_progress"])
+logger = logging.getLogger(__name__)
 
 @reading_progress_router.put("/update", response_model=ResponseSchema)
 async def upsert_reading_progress(
@@ -21,5 +24,9 @@ async def upsert_reading_progress(
     progress_entity = ReadingProgressDomain(**schema.model_dump())
     try:
         return await usecase(user_id, progress_entity)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    except Exception:
+        logger.exception("Failed to upsert reading progress for user %s", user_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update reading progress",
+        )
