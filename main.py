@@ -19,3 +19,8 @@ app.dependency_overrides[depends.book_protocol] = di.book_protocol
 app.dependency_overrides[depends.reading_progress_protocol] = di.reading_progress_protocol
 app.dependency_overrides[depends.uow_dependency] = di.uow_dependency
 app.dependency_overrides[depends.book_service_provider] = di.get_book_service_provider
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "service": "reader-service"}
