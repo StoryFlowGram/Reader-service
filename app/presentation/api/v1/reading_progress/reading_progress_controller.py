@@ -8,7 +8,7 @@ from app.domain.entity.reading_progress import ReadingProgressDomain
 
 from app.application.interfaces.uow import UnitOfWorkInterface
 from app.presentation.schemas.reading_progress.reading_progress_schemas import RequestSchema, ResponseSchema
-from app.presentation.api.depends import get_id_from_header, book_service_provider, uow_dependency 
+from app.presentation.api.depends import get_current_user, book_service_provider, uow_dependency 
 
 reading_progress_router = APIRouter(tags=["reading_progress"])
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 async def upsert_reading_progress(
     schema: RequestSchema, 
     uow: UnitOfWorkInterface = Depends(uow_dependency),
-    user_id: int = Depends(get_id_from_header),
+    user_id: int = Depends(get_current_user),
     book_service: IBookServiceProtocol = Depends(book_service_provider)
 ):
     usecase = UpsertReadingProgressUseCase(uow, book_service)
@@ -28,5 +28,5 @@ async def upsert_reading_progress(
         logger.exception("Failed to upsert reading progress for user %s", user_id)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update reading progress",
+            detail="Не вдалося оновити прогрес читання",
         )

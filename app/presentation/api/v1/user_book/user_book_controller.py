@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 
 
-from app.presentation.api.depends import uow_dependency, get_id_from_header
+from app.presentation.api.depends import uow_dependency, get_current_user
 from app.domain.entity.user_book import UserBook
 from app.domain.exception.user_book import BookAlreadyInLibrary
 from app.application.interfaces.uow import UnitOfWorkInterface
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 async def add_user_book(
     add_schema: AddRequestSchema, 
     uow: UnitOfWorkInterface = Depends(uow_dependency),
-    user_id: int = Depends(get_id_from_header)
+    user_id: int = Depends(get_current_user)
 ):
     usecase = AddBookToLibraryUseCase(uow)
     user_book_entity = UserBook(user_id=user_id, **add_schema.model_dump())
@@ -31,16 +31,16 @@ async def add_user_book(
         add_book = await usecase(user_id, user_book_entity) 
         return add_book
     except BookAlreadyInLibrary:
-        raise HTTPException(status_code=409, detail="Book is already in user library")
+        raise HTTPException(status_code=409, detail="Книга вже є в бібліотеці користувача")
     except Exception:
         logger.exception("Failed to add book to library for user %s", user_id)
-        raise HTTPException(status_code=400, detail="Failed to add book to library")
+        raise HTTPException(status_code=400, detail="Не вдалося додати книгу до бібліотеки")
     
 @user_book_router.get("/{book_id}", response_model=AddResponseSchema)
 async def get_user_book(
     book_id: int,
     uow: UnitOfWorkInterface = Depends(uow_dependency),
-    user_id: int = Depends(get_id_from_header)
+    user_id: int = Depends(get_current_user)
     ):
     usecase = GetUserBookUseCase(uow)
     try:
@@ -48,12 +48,12 @@ async def get_user_book(
         return get_book
     except Exception:
         logger.exception("Failed to get user book %s for user %s", book_id, user_id)
-        raise HTTPException(status_code=400, detail="Failed to load user book")
+        raise HTTPException(status_code=400, detail="Не вдалося завантажити книгу користувача")
     
 @user_book_router.get("/", response_model=list[AddResponseSchema])
 async def list_user_book(
     uow: UnitOfWorkInterface = Depends(uow_dependency),
-    user_id: int = Depends(get_id_from_header)
+    user_id: int = Depends(get_current_user)
     ):
     usecase = ListUserBooksUseCase(uow)
     try:
@@ -61,14 +61,14 @@ async def list_user_book(
         return get_list_book
     except Exception:
         logger.exception("Failed to list user books for user %s", user_id)
-        raise HTTPException(status_code=400, detail="Failed to list books")
+        raise HTTPException(status_code=400, detail="Не вдалося отримати список книг")
     
 
 @user_book_router.delete("/{book_id}")
 async def remove_user_book(
     book_id: int,
     uow: UnitOfWorkInterface = Depends(uow_dependency),
-    user_id: int = Depends(get_id_from_header)
+    user_id: int = Depends(get_current_user)
     ):
     usecase = RemoveBookFromLibraryUseCase(uow)
     try:
@@ -76,4 +76,4 @@ async def remove_user_book(
         return remove_book
     except Exception:
         logger.exception("Failed to remove user book %s for user %s", book_id, user_id)
-        raise HTTPException(status_code=400, detail="Failed to remove book")
+        raise HTTPException(status_code=400, detail="Не вдалося видалити книгу")

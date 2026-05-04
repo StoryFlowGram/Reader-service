@@ -41,7 +41,7 @@ async def ensure_gateway_request(
         )
 
 
-async def get_id_from_header(
+async def get_current_user(
     _: None = Depends(ensure_gateway_request),
     x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ) -> int:
