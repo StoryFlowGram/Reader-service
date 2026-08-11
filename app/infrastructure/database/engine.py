@@ -7,5 +7,5 @@ config = Config()
 
 engine: AsyncEngine = create_async_engine(
     config.db.sqlalchemy_database_url("asyncpg"),
-    echo=True,
+    echo=False,
 )

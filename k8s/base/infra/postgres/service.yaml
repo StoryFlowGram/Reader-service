@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-reader
+  namespace: default
+  labels:
+    app: postgres-reader
+    env: production
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres-reader
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

@@ -27,7 +27,15 @@ class URLConfig(BaseSettings):
 
     book_service_url: str = Field(alias="READER_BOOK_SERVICE_URL")
 
+
+class SecurityConfig(BaseSettings):
+    model_config = SettingsConfigDict(extra="ignore")
+
+    internal_gateway_token: str = Field(alias="INTERNAL_GATEWAY_TOKEN")
+
+
 class Config:
     def __init__(self):
         self.db = DatabaseConfig()
         self.url = URLConfig()
+        self.security = SecurityConfig()
